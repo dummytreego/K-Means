@@ -1,0 +1,76 @@
+def main(data, k): 
+    import random
+    centroids = initialize_centroids(data, k) 
+    
+    while True: 
+        old_centroids = centroids
+        labels = get_labels(data, centroids) 
+        centroids = update_centroids(data, labels, k) 
+
+        if should_stop(old_centroids, centroids): 
+            break 
+
+    return labels 
+
+
+def initialize_centroids(data, k):
+    x_min  = y_min = float('inf') 
+    x_max  = y_max = float('-inf')
+    #print (x_min)
+    for point in data: 
+        x_min = min(point[0], x_min) 
+        x_max = max(point[0], x_max)
+        y_min = min(point[1], y_min) 
+        y_max = max(point[1], y_max) 
+
+    centroids = [] 
+    for i in range(k): 
+        centroids.append([random_sample(x_min, x_max),random_sample(y_min, y_max)]) 
+    return centroids 
+
+
+def random_sample(low, high): 
+    import random 
+    return low + (high - low) * random.random() 
+
+def get_labels(data, centroids): 
+    labels = [] 
+    for point in data: 
+        min_dist = float('inf') 
+        #print (point)
+        label = None 
+        for i, centroid in enumerate(centroids): 
+            #print (i)
+            print (centroid)
+            new_dist = get_distance(point, centroid) 
+            if min_dist > new_dist: 
+                min_dist = new_dist 
+                label = i
+        labels.append(label) 
+    return labels 
+    
+def get_distance(point_1, point_2): 
+    return ((point_1[0] - point_2[0]) ** 2 + 
+            (point_1[1] - point_2[1]) ** 2) ** 0.5 
+
+def update_centroids(points, labels, k): 
+    new_centroids = [[0, 0] for i in range(k)] 
+    counts = [0] * k 
+
+    for point, label in zip(points, labels): 
+        new_centroids[label][0] += point[0] 
+        new_centroids[label][1] += point[1] 
+        counts[label] += 1 
+                           
+    for i, (x, y) in enumerate(new_centroids): 
+        new_centroids[i] = (x / counts[i], y / counts[i]) 
+    
+    return new_centroids 
+
+def should_stop(old_centroids, new_centroids, threshold= 0.00001): 
+    total_movement = 0 
+    for old_point, new_point in zip(old_centroids, new_centroids): 
+        total_movement += get_distance(old_point, new_point) 
+    return total_movement < threshold
+    
+main([(2,3),(5,3),(3,6)],2)    
